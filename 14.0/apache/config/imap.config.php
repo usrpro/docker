@@ -8,5 +8,5 @@ $CONFIG = array (
               '{imap.example.com:993/imap/ssl}', 'example.com'
           ),
       ),
-  )
+  ),
 );
