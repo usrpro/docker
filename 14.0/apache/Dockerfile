@@ -141,5 +141,11 @@ RUN set -ex; \
 COPY *.sh upgrade.exclude /
 COPY config/* /usr/src/nextcloud/config/
 
+RUN apt-get update \
+ && apt-get install -y libc-client-dev libkrb5-dev \
+ && rm -rf /var/lib/apt/lists/* \
+ && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+ && docker-php-ext-install imap
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]
