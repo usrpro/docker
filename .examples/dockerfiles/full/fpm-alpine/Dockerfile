@@ -4,6 +4,7 @@ RUN set -ex; \
     \
     apk add --no-cache \
         ffmpeg \
+        imagemagick \
         samba-client \
         supervisor \
 #       libreoffice \
@@ -40,7 +41,6 @@ RUN set -ex; \
     apk del .build-deps
 
 RUN mkdir -p \
-    /usr/share/man/man1 \
     /var/log/supervisord \
     /var/run/supervisord \
 ;

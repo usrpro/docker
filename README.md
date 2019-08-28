@@ -1,7 +1,14 @@
 # What is Nextcloud?
 
-[![Build Status update.sh](https://doi-janky.infosiftr.net/job/update.sh/job/nextcloud/badge/icon)](https://doi-janky.infosiftr.net/job/update.sh/job/nextcloud)
 [![Build Status Travis](https://travis-ci.org/nextcloud/docker.svg?branch=master)](https://travis-ci.org/nextcloud/docker)
+[![amd64 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/amd64/job/nextcloud.svg?label=amd64)](https://doi-janky.infosiftr.net/job/multiarch/job/amd64/job/nextcloud)
+[![arm32v5 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v5/job/nextcloud.svg?label=arm32v5)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v5/job/nextcloud)
+[![arm32v6 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v6/job/nextcloud.svg?label=arm32v6)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v6/job/nextcloud)
+[![arm32v7 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm32v7/job/nextcloud.svg?label=arm32v7)](https://doi-janky.infosiftr.net/job/multiarch/job/arm32v7/job/nextcloud)
+[![arm64v8 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/nextcloud.svg?label=arm64v8)](https://doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/nextcloud)
+[![i386 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/i386/job/nextcloud.svg?label=i386)](https://doi-janky.infosiftr.net/job/multiarch/job/i386/job/nextcloud)
+[![ppc64le build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/ppc64le/job/nextcloud.svg?label=ppc64le)](https://doi-janky.infosiftr.net/job/multiarch/job/ppc64le/job/nextcloud)
+<!--[![s390x build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/s390x/job/nextcloud.svg?label=s390x)](https://doi-janky.infosiftr.net/job/multiarch/job/s390x/job/nextcloud)-->
 
 A safe home for all your data. Access & share your files, calendars, contacts, mail & more from any device, on your terms.
 
@@ -29,7 +36,7 @@ Now you can access Nextcloud at http://localhost:8080/ from your host system.
 ## Using the fpm image
 To use the fpm image you need an additional web server that can proxy http-request to the fpm-port of the container. For fpm connection this container exposes port 9000. In most cases you might want use another container or your host as proxy.
 If you use your host you can address your Nextcloud container directly on port 9000. If you use another container, make sure that you add them to the same docker network (via `docker run --network <NAME> ...` or a `docker-compose` file).
-In both cases you don't want to map the fpm port to you host.
+In both cases you don't want to map the fpm port to your host.
 
 ```console
 $ docker run -d nextcloud:fpm
@@ -43,7 +50,7 @@ By default this container uses SQLite for data storage, but the Nextcloud setup 
 ## Persistent data
 The Nextcloud installation and all data beyond what lives in the database (file uploads, etc) is stored in the [unnamed docker volume](https://docs.docker.com/engine/tutorials/dockervolumes/#adding-a-data-volume) volume `/var/www/html`. The docker daemon will store that data within the docker directory `/var/lib/docker/volumes/...`. That means your data is saved even if the container crashes, is stopped or deleted.
 
-To make your data persistent to upgrading and get access for backups is using named docker volume or mount a host folder. To achieve this you need one volume for your database container and Nextcloud.
+A named Docker volume or a mounted host directory should be used for upgrades and backups. To achieve this you need one volume for your database container and one for Nextcloud.
 
 Nextcloud:
 - `/var/www/html/` folder where all nextcloud data lives
@@ -71,7 +78,7 @@ Overview of the folders that can be mounted as volumes:
 - `/var/www/html/custom_apps` installed / modified apps
 - `/var/www/html/config` local configuration
 - `/var/www/html/data` the actual data of your Nextcloud
-- `/var/www/html/themes/<YOU_CUSTOM_THEME>` theming/branding
+- `/var/www/html/themes/<YOUR_CUSTOM_THEME>` theming/branding
 
 If you want to use named volumes for all of these it would look like this
 ```console
@@ -97,7 +104,7 @@ $ docker-compose exec --user www-data app php occ
 ## Auto configuration via environment variables
 The nextcloud image supports auto configuration via environment variables. You can preconfigure everything that is asked on the install page on first run. To enable auto configuration, set your database connection via the following environment variables. ONLY use one database type!
 
-__SQLITE_DATABASE__:
+__SQLite__:
 - `SQLITE_DATABASE` Name of the database using sqlite
 
 __MYSQL/MariaDB__:
@@ -122,7 +129,7 @@ If you want you can set the data directory and table prefix, otherwise default v
 - `NEXTCLOUD_DATA_DIR` (default: _/var/www/html/data_) Configures the data directory where nextcloud stores all files from the users.
 - `NEXTCLOUD_TABLE_PREFIX` (default: _""_) Optional prefix for the tables. Used to be `oc_` in the past
 
-One or more trusted domains can be set by environemnt variable, too. They will be added to the configuration after install.
+One or more trusted domains can be set by environment variable, too. They will be added to the configuration after install.
 
 - `NEXTCLOUD_TRUSTED_DOMAINS` (not set by default) Optional space-separated list of domains
 
@@ -130,6 +137,25 @@ The install and update script is only triggered when a default command is used (
 
 - `NEXTCLOUD_UPDATE` (default: _0_)
 
+If you want to use Redis you have to create a separate [Redis](https://hub.docker.com/_/redis/) container in your setup / in your docker-compose file. To inform Nextcloud about the Redis container add:
+
+- `REDIS_HOST` (not set by default) Name of Redis container
+- `REDIS_HOST_PORT` (default: _6379_) Optional port for Redis, only use for external Redis servers that run on non-standard ports.
+
+The use of Redis is recommended to prevent file locking problems. See the examples for further instructions.
+
+To use a external SMTP server you have to provide the conection details. To configure Nextcloud to use SMTP add:
+
+- `SMTP_HOST` (not set by default) hostname of the SMTP server
+- `SMTP_SECURE` (empty by default) set to 'ssl' to use SSL on the connection.
+- `SMTP_PORT` (default: _465_ for SSL and _25_ for non-secure connection) Optional port for SMTP connection.
+- `SMTP_AUTHTYPE` (default: _LOGIN_) The method used for authentication.
+- `SMTP_NAME` (empty by default) Username for the authentication.
+- `SMTP_PASSWORD` (empty by default) Password for the authentication.
+- `MAIL_FROM_ADDRESS` (not set by default) Use this address for the 'from' field in the mail envelopes sent by Nextcloud.
+- `MAIL_DOMAIN` (not set by default) Set a different domain for the emails than the domain where Nextcloud is installed.
+
+Check the [Nextcloud documentation](https://docs.nextcloud.com/server/15/admin_manual/configuration_server/email_configuration.html) for other values to configure SMTP.
 
 
 # Running this image with docker-compose
@@ -240,7 +266,11 @@ In our [examples](https://github.com/nextcloud/docker/tree/master/.examples) sec
 When you first access your Nextcloud, the setup wizard will appear and ask you to choose an administrator account, password and the database connection. For the database use `db` as host and `nextcloud` as table and user name. Also enter the password you chose in your `docker-compose.yml` file.
 
 # Update to a newer version
-Updating the Nextcloud container is done by pulling the new image, throwing away the old container and starting the new one. Since all data is stored in volumes, nothing gets lost. The startup script will check for the version in your volume and the installed docker version. If it finds a mismatch, it automatically starts the upgrade process. Don't forget to add all the volumes to your new container, so it works as expected.
+Updating the Nextcloud container is done by pulling the new image, throwing away the old container and starting the new one.
+
+**It is only possible to upgrade one major version at a time. For example, if you want to upgrade from version 14 to 16, you will have to upgrade from version 14 to 15, then from 15 to 16.**
+
+Since all data is stored in volumes, nothing gets lost. The startup script will check for the version in your volume and the installed docker version. If it finds a mismatch, it automatically starts the upgrade process. Don't forget to add all the volumes to your new container, so it works as expected.
 
 ```console
 $ docker pull nextcloud
